@@ -1,0 +1,17 @@
+@import url('https://fonts.googleapis.com/css2?family=Quicksand:wght@300..700&display=swap');
+
+:root {
+  --primary-color: #f9a109;
+}
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+.navlink {
+  @apply px-6 py-2 relative flex items-center before:w-1.5 before:h-full before:absolute before:left-0 before:top-0 before:content-[''] before:bg-primary before:scale-y-0 before:hover:scale-y-100 before:rounded-r-full before:duration-200 before:transition-transform;
+}
+
+.navlink-selected {
+  @apply before:scale-y-100;
+}
