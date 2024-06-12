@@ -16,7 +16,7 @@ export default function Navbar() {
       </Link>
 
       <div className="space-y-10">
-        <NavLink to="/">
+        <NavLink to="/items">
           <ListIcon size={26} />
         </NavLink>
         <NavLink to="/history">

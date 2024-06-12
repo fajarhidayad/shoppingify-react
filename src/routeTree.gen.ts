@@ -13,29 +13,55 @@ import { createFileRoute } from '@tanstack/react-router'
 // Import Routes
 
 import { Route as rootRoute } from './routes/__root'
+import { Route as AuthImport } from './routes/_auth'
 
 // Create Virtual Routes
 
-const StatisticsLazyImport = createFileRoute('/statistics')()
-const HistoryLazyImport = createFileRoute('/history')()
+const RegisterLazyImport = createFileRoute('/register')()
+const LoginLazyImport = createFileRoute('/login')()
 const IndexLazyImport = createFileRoute('/')()
+const AuthStatisticsLazyImport = createFileRoute('/_auth/statistics')()
+const AuthItemsLazyImport = createFileRoute('/_auth/items')()
+const AuthHistoryLazyImport = createFileRoute('/_auth/history')()
 
 // Create/Update Routes
 
-const StatisticsLazyRoute = StatisticsLazyImport.update({
-  path: '/statistics',
+const RegisterLazyRoute = RegisterLazyImport.update({
+  path: '/register',
   getParentRoute: () => rootRoute,
-} as any).lazy(() => import('./routes/statistics.lazy').then((d) => d.Route))
+} as any).lazy(() => import('./routes/register.lazy').then((d) => d.Route))
 
-const HistoryLazyRoute = HistoryLazyImport.update({
-  path: '/history',
+const LoginLazyRoute = LoginLazyImport.update({
+  path: '/login',
   getParentRoute: () => rootRoute,
-} as any).lazy(() => import('./routes/history.lazy').then((d) => d.Route))
+} as any).lazy(() => import('./routes/login.lazy').then((d) => d.Route))
+
+const AuthRoute = AuthImport.update({
+  id: '/_auth',
+  getParentRoute: () => rootRoute,
+} as any)
 
 const IndexLazyRoute = IndexLazyImport.update({
   path: '/',
   getParentRoute: () => rootRoute,
 } as any).lazy(() => import('./routes/index.lazy').then((d) => d.Route))
+
+const AuthStatisticsLazyRoute = AuthStatisticsLazyImport.update({
+  path: '/statistics',
+  getParentRoute: () => AuthRoute,
+} as any).lazy(() =>
+  import('./routes/_auth.statistics.lazy').then((d) => d.Route),
+)
+
+const AuthItemsLazyRoute = AuthItemsLazyImport.update({
+  path: '/items',
+  getParentRoute: () => AuthRoute,
+} as any).lazy(() => import('./routes/_auth.items.lazy').then((d) => d.Route))
+
+const AuthHistoryLazyRoute = AuthHistoryLazyImport.update({
+  path: '/history',
+  getParentRoute: () => AuthRoute,
+} as any).lazy(() => import('./routes/_auth.history.lazy').then((d) => d.Route))
 
 // Populate the FileRoutesByPath interface
 
@@ -48,19 +74,47 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexLazyImport
       parentRoute: typeof rootRoute
     }
-    '/history': {
-      id: '/history'
-      path: '/history'
-      fullPath: '/history'
-      preLoaderRoute: typeof HistoryLazyImport
+    '/_auth': {
+      id: '/_auth'
+      path: ''
+      fullPath: ''
+      preLoaderRoute: typeof AuthImport
       parentRoute: typeof rootRoute
     }
-    '/statistics': {
-      id: '/statistics'
+    '/login': {
+      id: '/login'
+      path: '/login'
+      fullPath: '/login'
+      preLoaderRoute: typeof LoginLazyImport
+      parentRoute: typeof rootRoute
+    }
+    '/register': {
+      id: '/register'
+      path: '/register'
+      fullPath: '/register'
+      preLoaderRoute: typeof RegisterLazyImport
+      parentRoute: typeof rootRoute
+    }
+    '/_auth/history': {
+      id: '/_auth/history'
+      path: '/history'
+      fullPath: '/history'
+      preLoaderRoute: typeof AuthHistoryLazyImport
+      parentRoute: typeof AuthImport
+    }
+    '/_auth/items': {
+      id: '/_auth/items'
+      path: '/items'
+      fullPath: '/items'
+      preLoaderRoute: typeof AuthItemsLazyImport
+      parentRoute: typeof AuthImport
+    }
+    '/_auth/statistics': {
+      id: '/_auth/statistics'
       path: '/statistics'
       fullPath: '/statistics'
-      preLoaderRoute: typeof StatisticsLazyImport
-      parentRoute: typeof rootRoute
+      preLoaderRoute: typeof AuthStatisticsLazyImport
+      parentRoute: typeof AuthImport
     }
   }
 }
@@ -69,8 +123,13 @@ declare module '@tanstack/react-router' {
 
 export const routeTree = rootRoute.addChildren({
   IndexLazyRoute,
-  HistoryLazyRoute,
-  StatisticsLazyRoute,
+  AuthRoute: AuthRoute.addChildren({
+    AuthHistoryLazyRoute,
+    AuthItemsLazyRoute,
+    AuthStatisticsLazyRoute,
+  }),
+  LoginLazyRoute,
+  RegisterLazyRoute,
 })
 
 /* prettier-ignore-end */
@@ -82,18 +141,39 @@ export const routeTree = rootRoute.addChildren({
       "filePath": "__root.tsx",
       "children": [
         "/",
-        "/history",
-        "/statistics"
+        "/_auth",
+        "/login",
+        "/register"
       ]
     },
     "/": {
       "filePath": "index.lazy.tsx"
     },
-    "/history": {
-      "filePath": "history.lazy.tsx"
+    "/_auth": {
+      "filePath": "_auth.tsx",
+      "children": [
+        "/_auth/history",
+        "/_auth/items",
+        "/_auth/statistics"
+      ]
     },
-    "/statistics": {
-      "filePath": "statistics.lazy.tsx"
+    "/login": {
+      "filePath": "login.lazy.tsx"
+    },
+    "/register": {
+      "filePath": "register.lazy.tsx"
+    },
+    "/_auth/history": {
+      "filePath": "_auth.history.lazy.tsx",
+      "parent": "/_auth"
+    },
+    "/_auth/items": {
+      "filePath": "_auth.items.lazy.tsx",
+      "parent": "/_auth"
+    },
+    "/_auth/statistics": {
+      "filePath": "_auth.statistics.lazy.tsx",
+      "parent": "/_auth"
     }
   }
 }

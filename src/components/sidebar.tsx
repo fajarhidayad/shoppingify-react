@@ -1,11 +1,12 @@
-import { FormEvent, useState } from 'react';
-import BottleLogo from '../assets/bottle-logo';
 import { PencilIcon } from 'lucide-react';
-import ItemDetailsMenu from './item-details-menu';
+import { FormEvent } from 'react';
+import BottleLogo from '../assets/bottle-logo';
+import { useSidebarStore } from '../store/useSidebarStore';
 import CreateItemForm from './create-item-form';
+import ItemDetailsMenu from './item-details-menu';
 
 export default function Sidebar() {
-  const [menu, setMenu] = useState<'list' | 'form' | 'details'>('list');
+  const { active, setListActive, setCreateActive } = useSidebarStore();
 
   function onSaveListName(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -13,13 +14,11 @@ export default function Sidebar() {
 
   return (
     <aside className="w-[389px] fixed right-0 h-full">
-      {menu === 'details' && (
-        <ItemDetailsMenu onCloseDetails={() => setMenu('list')} />
+      {active === 'details' && (
+        <ItemDetailsMenu onCloseDetails={setListActive} />
       )}
-      {menu === 'form' && (
-        <CreateItemForm onCloseForm={() => setMenu('list')} />
-      )}
-      {menu === 'list' && (
+      {active === 'create' && <CreateItemForm onCloseForm={setListActive} />}
+      {active === 'lists' && (
         <div className="bg-[#FFF0DE] flex flex-col h-full">
           <div className="pt-11 flex-1 flex flex-col">
             <section className="bg-[#80485B] rounded-3xl px-7 py-4 flex mb-9 mx-8">
@@ -31,7 +30,7 @@ export default function Sidebar() {
                   Didn’t find what you need?
                 </h2>
                 <button
-                  onClick={() => setMenu('form')}
+                  onClick={setCreateActive}
                   className="bg-white rounded-xl px-7 py-3 text-sm font-bold"
                 >
                   Add item
