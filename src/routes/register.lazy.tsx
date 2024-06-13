@@ -1,20 +1,34 @@
+import { RegisterParams, registerFn, registerSchema } from '@/api/auth';
+import { useMutation } from '@tanstack/react-query';
 import { Link, createLazyFileRoute } from '@tanstack/react-router';
-import { FormEvent } from 'react';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
 
 export const Route = createLazyFileRoute('/register')({
   component: () => <RegisterPage />,
 });
 
 function RegisterPage() {
-  const onSubmitForm = (e: FormEvent) => {
-    e.preventDefault();
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<RegisterParams>({ resolver: zodResolver(registerSchema) });
+
+  const registerMutation = useMutation({ mutationFn: registerFn });
+
+  const onSubmitForm = (data: RegisterParams) => {
+    console.log(data);
+    if (data.email && data.password) {
+      registerMutation.mutate(data);
+    }
   };
 
   return (
     <div className="flex flex-col justify-center items-center min-h-screen bg-orange-50">
       <h1 className="font-bold text-3xl mb-5 text-slate-800">Shoppingify</h1>
       <form
-        onSubmit={onSubmitForm}
+        onSubmit={handleSubmit(onSubmitForm)}
         className="bg-white rounded-xl px-10 py-7 shadow min-w-[450px] flex flex-col"
       >
         <h2 className="font-bold text-xl mb-5 text-slate-800">Sign up</h2>
@@ -27,9 +41,12 @@ function RegisterPage() {
           </label>
           <input
             type="text"
-            name="name"
+            {...register('name')}
             className="border-2 border-slate-700 px-5 py-3 rounded-xl focus:outline-primary"
           />
+          {errors.name && (
+            <p className="mt-2 text-sm text-red-500">{errors.name.message}</p>
+          )}
         </div>
         <div className="flex flex-col mb-5">
           <label
@@ -40,9 +57,12 @@ function RegisterPage() {
           </label>
           <input
             type="email"
-            name="email"
+            {...register('email')}
             className="border-2 border-slate-700 px-5 py-3 rounded-xl focus:outline-primary"
           />
+          {errors.email && (
+            <p className="mt-2 text-sm text-red-500">{errors.email.message}</p>
+          )}
         </div>
         <div className="flex flex-col mb-5">
           <label
@@ -53,9 +73,14 @@ function RegisterPage() {
           </label>
           <input
             type="password"
-            name="password"
+            {...register('password')}
             className="border-2 border-slate-700 px-5 py-3 rounded-xl focus:outline-primary"
           />
+          {errors.password && (
+            <p className="mt-2 text-sm text-red-500">
+              {errors.password.message}
+            </p>
+          )}
         </div>
         <button className="bg-primary text-white rounded-xl py-4 font-bold mb-3">
           Register

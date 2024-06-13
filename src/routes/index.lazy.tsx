@@ -27,7 +27,7 @@ function HomePage() {
   }, []);
 
   return (
-    <div className="flex flex-col min-h-screen absolute inset-0 h-full w-full bg-white bg-[radial-gradient(#e5e7eb_1px,transparent_1px)] [background-size:16px_16px]">
+    <div className="flex flex-col absolute inset-0 min-h-screen w-full bg-white bg-[radial-gradient(#e5e7eb_1px,transparent_1px)] [background-size:16px_16px]">
       <nav
         className={clsx({
           'fixed top-0 py-5 flex items-center w-full duration-200 ease-in transition-all z-50':
@@ -41,7 +41,7 @@ function HomePage() {
           </Link>
         </div>
       </nav>
-      <main className="pt-20">
+      <main className="pt-20 flex-1 flex justify-center items-center">
         <section className="py-20 container relative flex flex-col items-center text-center">
           {/* <div className="absolute bg-yellow-400/50 rounded-full blur-[100px] w-[400px] h-[300px] right-0 -z-10"></div>
           <div className="absolute bg-orange-400/50 rounded-full blur-[100px] w-[400px] h-[300px] left-0 top-[800px] -z-10"></div> */}
