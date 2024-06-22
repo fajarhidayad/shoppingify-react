@@ -1,35 +1,48 @@
 import { useMutation } from '@tanstack/react-query';
 import { Link, createLazyFileRoute } from '@tanstack/react-router';
-import { login, loginSchema, type LoginParams } from '@/api/auth';
+import { login as loginApi, loginSchema, type LoginParams } from '@/api/auth';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { useToast } from '@/components/ui/use-toast';
+import { useAuth } from '@/hooks/useAuth';
 
 export const Route = createLazyFileRoute('/login')({
   component: () => <LoginPage />,
 });
 
 function LoginPage() {
+  const { login } = useAuth();
   const {
     register,
     handleSubmit,
     formState: { errors },
   } = useForm<LoginParams>({ resolver: zodResolver(loginSchema) });
+  const { toast } = useToast();
 
-  const loginMutation = useMutation({ mutationFn: login });
+  const { mutate: mutateLogin } = useMutation({ mutationFn: loginApi });
 
   const onSubmitForm = (data: LoginParams) => {
-    console.log(data);
     if (data.email && data.password) {
-      loginMutation.mutate(data);
+      mutateLogin(data, {
+        onSuccess(data) {
+          login(data.access_token);
+        },
+        onError(err) {
+          toast({
+            title: err.message,
+            variant: 'destructive',
+          });
+        },
+      });
     }
   };
 
   return (
-    <div className="flex flex-col justify-center items-center min-h-screen bg-orange-50">
+    <div className="flex flex-col justify-center items-center min-h-screen bg-orange-50 px-5 sm:px-0">
       <h1 className="font-bold text-3xl mb-5 text-slate-800">Shoppingify</h1>
       <form
         onSubmit={handleSubmit(onSubmitForm)}
-        className="bg-white rounded-xl px-10 py-7 shadow sm:w-[450px] flex flex-col"
+        className="bg-white rounded-xl p-5 md:px-10 md:py-7 w-full sm:w-[500px] shadow flex flex-col"
       >
         <h2 className="font-bold text-xl mb-5 text-slate-800">Sign in</h2>
         <div className="flex flex-col mb-5">
@@ -42,7 +55,7 @@ function LoginPage() {
           <input
             type="email"
             {...register('email')}
-            className="border-2 border-slate-700 px-5 py-3 rounded-xl"
+            className="border-2 border-slate-300 px-5 py-3 rounded-xl focus:outline-primary"
           />
           {errors.email && (
             <p className="mt-2 text-sm text-red-500">{errors.email.message}</p>
@@ -58,7 +71,7 @@ function LoginPage() {
           <input
             type="password"
             {...register('password')}
-            className="border-2 border-slate-700 px-5 py-3 rounded-xl"
+            className="border-2 border-slate-300 px-5 py-3 rounded-xl focus:outline-primary"
           />
           {errors.password && (
             <p className="mt-2 text-sm text-red-500">
@@ -68,7 +81,7 @@ function LoginPage() {
         </div>
         <button
           type="submit"
-          className="bg-primary text-white rounded-xl py-4 font-bold mb-3"
+          className="bg-primary text-white rounded-xl py-4 font-bold mb-3 focus:outline-primary focus:outline-offset-4"
         >
           Sign in
         </button>

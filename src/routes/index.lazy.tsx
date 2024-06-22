@@ -27,7 +27,7 @@ function HomePage() {
   }, []);
 
   return (
-    <div className="flex flex-col absolute inset-0 min-h-screen w-full bg-white bg-[radial-gradient(#e5e7eb_1px,transparent_1px)] [background-size:16px_16px]">
+    <div className="flex flex-col absolute inset-0 min-h-screen h-full w-full bg-white bg-[radial-gradient(#e5e7eb_1px,transparent_1px)] [background-size:16px_16px]">
       <nav
         className={clsx({
           'fixed top-0 py-5 flex items-center w-full duration-200 ease-in transition-all z-50':
@@ -35,10 +35,25 @@ function HomePage() {
           'bg-white/80 backdrop-blur': isScrolled,
         })}
       >
-        <div className="container">
+        <div className="container flex justify-between items-center">
           <Link to="/">
             <MainLogo />
           </Link>
+
+          <div className="flex items-center space-x-4">
+            <button
+              onClick={() => navigate({ to: '/login' })}
+              className="bg-primary text-white rounded-lg px-5 py-3"
+            >
+              Login
+            </button>
+            <button
+              onClick={() => navigate({ to: '/register' })}
+              className="text-primary border border-primary bg-white rounded-lg px-5 py-3"
+            >
+              Register
+            </button>
+          </div>
         </div>
       </nav>
       <main className="pt-20 flex-1 flex justify-center items-center">

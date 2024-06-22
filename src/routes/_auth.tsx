@@ -1,8 +1,15 @@
-import { Outlet, createFileRoute } from '@tanstack/react-router';
+import { Outlet, createFileRoute, redirect } from '@tanstack/react-router';
 import Navbar from '../components/navbar';
 import Sidebar from '../components/sidebar';
 
 export const Route = createFileRoute('/_auth')({
+  beforeLoad: async ({ context }) => {
+    if (!context.auth?.isAuthenticated) {
+      throw redirect({
+        to: '/',
+      });
+    }
+  },
   component: () => <AuthLayout />,
 });
 

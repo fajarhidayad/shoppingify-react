@@ -42,7 +42,7 @@ function RegisterPage() {
           <input
             type="text"
             {...register('name')}
-            className="border-2 border-slate-700 px-5 py-3 rounded-xl focus:outline-primary"
+            className="border-2 border-slate-300 px-5 py-3 rounded-xl focus:outline-primary"
           />
           {errors.name && (
             <p className="mt-2 text-sm text-red-500">{errors.name.message}</p>
@@ -58,7 +58,7 @@ function RegisterPage() {
           <input
             type="email"
             {...register('email')}
-            className="border-2 border-slate-700 px-5 py-3 rounded-xl focus:outline-primary"
+            className="border-2 border-slate-300 px-5 py-3 rounded-xl focus:outline-primary"
           />
           {errors.email && (
             <p className="mt-2 text-sm text-red-500">{errors.email.message}</p>
@@ -74,7 +74,7 @@ function RegisterPage() {
           <input
             type="password"
             {...register('password')}
-            className="border-2 border-slate-700 px-5 py-3 rounded-xl focus:outline-primary"
+            className="border-2 border-slate-300 px-5 py-3 rounded-xl focus:outline-primary"
           />
           {errors.password && (
             <p className="mt-2 text-sm text-red-500">
