@@ -1,14 +1,16 @@
 import { RegisterParams, registerFn, registerSchema } from '@/api/auth';
 import { useMutation } from '@tanstack/react-query';
-import { Link, createLazyFileRoute } from '@tanstack/react-router';
+import { Link, Navigate, createLazyFileRoute } from '@tanstack/react-router';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { useAuth } from '@/hooks/useAuth';
 
 export const Route = createLazyFileRoute('/register')({
   component: () => <RegisterPage />,
 });
 
 function RegisterPage() {
+  const { isAuthenticated } = useAuth();
   const {
     register,
     handleSubmit,
@@ -23,6 +25,10 @@ function RegisterPage() {
       registerMutation.mutate(data);
     }
   };
+
+  if (isAuthenticated) {
+    return <Navigate to="/items" replace />;
+  }
 
   return (
     <div className="flex flex-col justify-center items-center min-h-screen bg-orange-50">

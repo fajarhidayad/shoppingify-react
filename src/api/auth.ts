@@ -1,5 +1,6 @@
 import { z } from 'zod';
 import { api } from '.';
+import { ErrorResponse } from './error-response';
 
 // interface FetchHelperOpts {
 //   method?: 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE';
@@ -35,16 +36,6 @@ import { api } from '.';
 //   return response.json();
 // }
 
-class ErrorResponse extends Error {
-  statusCode: number;
-  constructor(name: string, message: string, statusCode: number) {
-    super();
-    this.name = name;
-    this.message = message;
-    this.statusCode = statusCode;
-  }
-}
-
 export const loginSchema = z.object({
   email: z.string().email(),
   password: z.string().trim().min(6).max(32),
@@ -62,13 +53,7 @@ export type RegisterParams = z.infer<typeof registerSchema>;
 export async function login(data: LoginParams) {
   try {
     const res = await api.post('/auth/login', data);
-
-    if (res.data.access_token) {
-      return res.data as { access_token: string };
-    } else {
-      throw new Error('Something went wrong');
-    }
-
+    return res.data;
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } catch (error: any) {
     const res = error.response.data;
@@ -77,5 +62,25 @@ export async function login(data: LoginParams) {
 }
 
 export async function registerFn(data: RegisterParams) {
-  return data;
+  try {
+    const res = await api.post('/auth/register', data);
+
+    return res.data;
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  } catch (error: any) {
+    const res = error.response.data;
+    throw new ErrorResponse(res.error, res.message, res.statusCode);
+  }
+}
+
+export async function logout() {
+  try {
+    const res = await api.get('/auth/logout');
+    return res.data;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  } catch (error: any) {
+    const res = error.response.data;
+    throw new ErrorResponse(res.error, res.message, res.statusCode);
+  }
 }

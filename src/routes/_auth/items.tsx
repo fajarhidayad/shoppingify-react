@@ -1,13 +1,16 @@
-import { createLazyFileRoute } from '@tanstack/react-router';
+import { getItems } from '@/api/items';
+import { createFileRoute, useLoaderData } from '@tanstack/react-router';
 import { PlusIcon, SearchIcon } from 'lucide-react';
-import { useSidebarStore } from '../store/useSidebarStore';
+import { useSidebarStore } from '@/store/useSidebarStore';
 
-export const Route = createLazyFileRoute('/_auth/items')({
+export const Route = createFileRoute('/_auth/items')({
+  loader: () => getItems(),
   component: () => <ItemsPage />,
 });
 
 function ItemsPage() {
   const setItemDetails = useSidebarStore((state) => state.setDetailsActive);
+  const items = useLoaderData({ from: '/_auth/items' });
 
   return (
     <>
@@ -30,18 +33,21 @@ function ItemsPage() {
       <section className="mb-11">
         <h3 className="text-lg font-medium mb-4">Fruit and vegetables</h3>
         <ul className="grid grid-cols-4 gap-x-5 gap-y-6 mb-11">
-          <li
-            onClick={setItemDetails}
-            className="bg-white rounded-xl shadow p-4 flex items-center justify-between hover:cursor-pointer"
-          >
-            <p className="font-medium">Avocado</p>
-            <button
-              onClick={(e) => e.stopPropagation()}
-              className="text-gray-400 hover:bg-gray-100 hover:text-primary p-1 rounded-full"
+          {items.map((item) => (
+            <li
+              key={item.id}
+              onClick={setItemDetails}
+              className="bg-white rounded-xl shadow p-4 flex items-center justify-between hover:cursor-pointer"
             >
-              <PlusIcon size={24} />
-            </button>
-          </li>
+              <p className="font-medium">{item.name}</p>
+              <button
+                onClick={(e) => e.stopPropagation()}
+                className="text-gray-400 hover:bg-gray-100 hover:text-primary p-1 rounded-full"
+              >
+                <PlusIcon size={24} />
+              </button>
+            </li>
+          ))}
         </ul>
       </section>
     </>

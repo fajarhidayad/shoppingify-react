@@ -1,6 +1,43 @@
+import { zodResolver } from '@hookform/resolvers/zod';
+import { UseFormRegister, UseFormSetValue, useForm } from 'react-hook-form';
+import { z } from 'zod';
+import ErrorText from './error-text';
+import { useQuery } from '@tanstack/react-query';
+import { Category, getCategories } from '@/api/categories';
+import { useEffect, useRef, useState } from 'react';
+
+const createItemSchema = z.object({
+  name: z.string().min(1, { message: 'Name is required' }).max(50).trim(),
+  note: z.union([z.string().max(255).nullish(), z.literal('')]),
+  imageUrl: z.union([z.string().max(255).nullish(), z.literal('')]),
+  categoryName: z
+    .string()
+    .min(1, { message: 'Category is required' })
+    .max(50)
+    .trim(),
+});
+
+type CreateItem = z.infer<typeof createItemSchema>;
+
 export default function CreateItemForm(props: { onCloseForm: () => void }) {
+  const {
+    register,
+    handleSubmit,
+    setValue,
+    formState: { errors },
+  } = useForm<CreateItem>({
+    resolver: zodResolver(createItemSchema),
+  });
+
+  function onCreateItem(data: CreateItem) {
+    console.log(data);
+  }
+
   return (
-    <form className="px-11 py-8 flex flex-col h-full bg-white">
+    <form
+      onSubmit={handleSubmit(onCreateItem)}
+      className="px-11 py-8 flex flex-col h-full bg-white"
+    >
       <h1 className="font-medium text-2xl mb-8">Add a new item</h1>
       <div className="mb-4 flex flex-col">
         <label htmlFor="name" className="font-medium text-sm mb-1.5">
@@ -8,21 +45,23 @@ export default function CreateItemForm(props: { onCloseForm: () => void }) {
         </label>
         <input
           type="text"
+          {...register('name')}
           className="border-2 border-gray-300 rounded-xl py-5 px-4 focus:outline-none focus:border-primary bg-transparent"
-          name="name"
           placeholder="Enter a name"
           autoComplete="off"
         />
+        {errors.name && <ErrorText>{errors.name.message}</ErrorText>}
       </div>
       <div className="mb-4 flex flex-col">
         <label htmlFor="note" className="font-medium text-sm mb-1.5">
           Note (optional)
         </label>
         <textarea
+          {...register('note')}
           className="border-2 border-gray-300 rounded-xl py-5 px-4 focus:outline-none focus:border-primary bg-transparent"
-          name="note"
           placeholder="Enter a note"
         />
+        {errors.note && <ErrorText>{errors.note.message}</ErrorText>}
       </div>
       <div className="mb-4 flex flex-col">
         <label htmlFor="imageUrl" className="font-medium text-sm mb-1.5">
@@ -31,22 +70,27 @@ export default function CreateItemForm(props: { onCloseForm: () => void }) {
         <input
           type="text"
           className="border-2 border-gray-300 rounded-xl py-5 px-4 focus:outline-none focus:border-primary bg-transparent"
-          name="imageUrl"
+          {...register('imageUrl')}
           placeholder="Enter a url"
           autoComplete="off"
         />
+        {errors.imageUrl && <ErrorText>{errors.imageUrl.message}</ErrorText>}
       </div>
       <div className="mb-4 flex flex-col">
-        <label htmlFor="category" className="font-medium text-sm mb-1.5">
+        <label htmlFor="categoryName" className="font-medium text-sm mb-1.5">
           Category
         </label>
-        <input
+        {/* <input
           type="text"
           className="border-2 border-gray-300 rounded-xl py-5 px-4 focus:outline-none focus:border-primary bg-transparent"
-          name="category"
+          {...register('categoryName')}
           placeholder="Enter a category"
           autoComplete="off"
-        />
+        /> */}
+        <CategoryInputDropdown register={register} setValues={setValue} />
+        {errors.categoryName && (
+          <ErrorText>{errors.categoryName.message}</ErrorText>
+        )}
       </div>
 
       <div className="flex items-center justify-center space-x-4 mt-auto">
@@ -64,5 +108,86 @@ export default function CreateItemForm(props: { onCloseForm: () => void }) {
         </button>
       </div>
     </form>
+  );
+}
+
+function CategoryInputDropdown({
+  register,
+  setValues,
+}: {
+  register: UseFormRegister<CreateItem>;
+  setValues: UseFormSetValue<CreateItem>;
+}) {
+  const [value, setValue] = useState<string>('');
+  const [dropdown, setDropdown] = useState(false);
+  const [filteredCategories, setFilteredCategories] = useState<
+    Category[] | undefined
+  >([]);
+
+  const ref = useRef<HTMLDivElement>(null);
+
+  const { data: categories } = useQuery({
+    queryKey: ['categories'],
+    queryFn: getCategories,
+  });
+
+  const handleClickOutside = (e: MouseEvent) => {
+    if (ref.current && !ref.current.contains(e.target as Node)) {
+      setDropdown(false);
+    }
+  };
+
+  useEffect(() => {
+    document.addEventListener('mousedown', handleClickOutside);
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
+
+  useEffect(() => {
+    const filtered = categories?.filter((cat) =>
+      cat.name.toLowerCase().includes(value.toLowerCase())
+    );
+    setFilteredCategories(filtered);
+  }, [categories, value]);
+
+  return (
+    <div ref={ref} className="relative">
+      <input
+        type="text"
+        className="border-2 border-gray-300 rounded-xl py-5 px-4 focus:outline-none focus:border-primary bg-transparent w-full"
+        placeholder="Enter a category"
+        autoComplete="off"
+        onFocus={() => {
+          if (categories) {
+            setDropdown(categories.length > 0);
+          }
+        }}
+        {...register('categoryName', {
+          value,
+          onChange: (e) => {
+            setValue(e.target.value);
+          },
+        })}
+      />
+
+      {dropdown && filteredCategories && filteredCategories.length > 0 && (
+        <ul className="absolute w-full px-3 py-2 rounded-lg border bg-white max-h-[150px] translate-y-2">
+          {filteredCategories?.map((category) => (
+            <li
+              key={category.id}
+              onClick={() => {
+                setValues('categoryName', category.name);
+                setDropdown(false);
+              }}
+              className="px-3 py-2 rounded-md hover:bg-gray-100 cursor-pointer"
+            >
+              {category.name}
+            </li>
+          ))}
+        </ul>
+      )}
+    </div>
   );
 }

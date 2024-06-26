@@ -16,6 +16,9 @@ module.exports = {
         '2xl': '1400px',
       },
     },
+    fontFamily: {
+      sans: ['Quicksand', 'sans-serif'],
+    },
     extend: {
       colors: {
         primary: '#f9a109',

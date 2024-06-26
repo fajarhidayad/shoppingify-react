@@ -10,7 +10,9 @@ export default function ItemDetailsMenu(props: { onCloseDetails: () => void }) {
         </button>
       </div>
 
-      <div className="h-52 bg-gray-200 rounded-3xl mb-12"></div>
+      <div className="h-52 bg-gray-200 rounded-3xl mb-12 flex items-center justify-center">
+        <p className="text-sm font-semibold text-gray-500">No image</p>
+      </div>
 
       <div className="font-medium mb-8">
         <p className="text-xs text-gray-400 mb-3">name</p>

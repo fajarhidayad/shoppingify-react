@@ -22,12 +22,9 @@ declare module '@tanstack/react-router' {
 export default function App() {
   const auth = useAuth();
 
-  console.log('rerender');
   return (
-    <React.StrictMode>
-      <QueryClientProvider client={queryClient}>
-        <RouterProvider router={router} context={{ auth }} />
-      </QueryClientProvider>
-    </React.StrictMode>
+    <QueryClientProvider client={queryClient}>
+      <RouterProvider router={router} context={{ auth }} />
+    </QueryClientProvider>
   );
 }
