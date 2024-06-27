@@ -1,14 +1,22 @@
 import { Outlet, createFileRoute, redirect } from '@tanstack/react-router';
 import Navbar from '../components/navbar';
 import Sidebar from '../components/sidebar';
+import { getProfile } from '@/api/auth';
 
 export const Route = createFileRoute('/_auth')({
   beforeLoad: async ({ context }) => {
-    if (!context.auth?.isAuthenticated) {
+    try {
+      const auth = await getProfile();
+      context.auth?.login(auth);
+    } catch (error) {
+      console.error(error);
       throw redirect({
         to: '/',
       });
     }
+  },
+  onError: async (err) => {
+    console.log(err);
   },
   component: () => <AuthLayout />,
 });

@@ -18,26 +18,15 @@ const AuthContext = createContext<AuthContextProps | undefined>(undefined);
 export const AuthProvider: React.FC<{ children: ReactNode }> = ({
   children,
 }) => {
-  const [user, setUser] = useState<UserInfo | null>(
-    localStorage.getItem('userInfo')
-      ? JSON.parse(localStorage.getItem('userInfo')!)
-      : null
-  );
-  const [isAuthenticated, setIsAuthenticated] = useState(() => {
-    const userInfo = localStorage.getItem('userInfo');
-
-    if (userInfo) return true;
-    return false;
-  });
+  const [user, setUser] = useState<UserInfo | null>(null);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
 
   function login(data: UserInfo) {
-    localStorage.setItem('userInfo', JSON.stringify(data));
     setUser(data);
     setIsAuthenticated(true);
   }
 
   function logout() {
-    localStorage.removeItem('userInfo');
     setUser(null);
     setIsAuthenticated(false);
   }

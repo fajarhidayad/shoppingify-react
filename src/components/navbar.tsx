@@ -1,4 +1,4 @@
-import { Link } from '@tanstack/react-router';
+import { Link, useNavigate } from '@tanstack/react-router';
 import {
   BarChart3Icon,
   HistoryIcon,
@@ -7,8 +7,22 @@ import {
 } from 'lucide-react';
 import { ReactNode } from 'react';
 import MainLogo from '../assets/main-logo';
+import { useAuth } from '@/hooks/useAuth';
+import { useMutation } from '@tanstack/react-query';
+import { logoutFn } from '@/api/auth';
 
 export default function Navbar() {
+  const { logout } = useAuth();
+  const navigate = useNavigate();
+
+  const logoutMut = useMutation({
+    mutationFn: logoutFn,
+    onSuccess() {
+      logout();
+      navigate({ to: '/', replace: true });
+    },
+  });
+
   return (
     <nav className="fixed left-0 h-screen bg-white shadow py-12 flex flex-col justify-between items-center">
       <Link to="/">
@@ -27,8 +41,11 @@ export default function Navbar() {
         </NavLink>
       </div>
 
-      <div className="bg-primary p-3 rounded-full text-white">
-        <ShoppingCartIcon size={20} />
+      <div>
+        <div className="bg-primary p-3 rounded-full text-white">
+          <ShoppingCartIcon size={20} />
+        </div>
+        <button onClick={() => logoutMut.mutate()}>Logout</button>
       </div>
     </nav>
   );

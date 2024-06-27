@@ -74,9 +74,20 @@ export async function registerFn(data: RegisterParams) {
   }
 }
 
-export async function logout() {
+export async function getProfile() {
   try {
-    const res = await api.get('/auth/logout');
+    const res = await api.get('/auth/profile');
+    return res.data;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  } catch (error: any) {
+    const res = error.response.data;
+    throw new ErrorResponse(res.error, res.message, res.statusCode);
+  }
+}
+
+export async function logoutFn() {
+  try {
+    const res = await api.post('/auth/logout');
     return res.data;
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } catch (error: any) {

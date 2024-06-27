@@ -27,7 +27,7 @@ function HomePage() {
   }, []);
 
   return (
-    <div className="flex flex-col absolute inset-0 min-h-screen h-full w-full bg-white bg-[radial-gradient(#e5e7eb_1px,transparent_1px)] [background-size:16px_16px]">
+    <div className="flex flex-col absolute inset-0 min-h-screen w-full bg-white bg-[radial-gradient(#e5e7eb_1px,transparent_1px)] [background-size:16px_16px]">
       <nav
         className={clsx({
           'fixed top-0 py-5 flex items-center w-full duration-200 ease-in transition-all z-50':

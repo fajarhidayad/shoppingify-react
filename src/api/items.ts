@@ -1,7 +1,7 @@
 import { api } from '.';
 import { ErrorResponse } from './error-response';
 
-interface Item {
+export interface Item {
   id: number;
   name: string;
   imageUrl?: string;
@@ -10,6 +10,9 @@ interface Item {
   categoryId: number;
   createdAt: string;
   updatedAt: string;
+  category: {
+    name: string;
+  };
 }
 
 export async function getItems() {
