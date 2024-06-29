@@ -5,10 +5,10 @@ type ActiveMenu = 'lists' | 'details' | 'create';
 
 interface SidebarState {
   active: ActiveMenu;
-  itemDetails: Item | null;
+  itemDetails: (Item & { categoryName: string }) | null;
   setListActive: () => void;
   setCreateActive: () => void;
-  setDetailsActive: (item: Item) => void;
+  setDetailsActive: (item: Item & { categoryName: string }) => void;
 }
 
 export const useSidebarStore = create<SidebarState>()((set) => ({

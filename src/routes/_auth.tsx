@@ -26,7 +26,7 @@ function AuthLayout() {
     <div className="min-h-screen flex relative bg-gray-100">
       <Navbar />
 
-      <main className="flex-1 container py-7 pl-[102px] pr-[417px]">
+      <main className="flex-1 container py-7 pl-[86px] pr-3 lg:pl-[102px] lg:pr-[417px]">
         <Outlet />
       </main>
 

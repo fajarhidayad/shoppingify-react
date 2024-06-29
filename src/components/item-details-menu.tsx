@@ -24,7 +24,7 @@ export default function ItemDetailsMenu(props: { onCloseDetails: () => void }) {
       </div>
       <div className="font-medium mb-8">
         <p className="text-xs text-gray-400 mb-3">category</p>
-        <p className="text-lg">{item?.category.name}</p>
+        <p className="text-lg">{item?.categoryName}</p>
       </div>
       <div className="font-medium mb-8">
         <p className="text-xs text-gray-400 mb-3">note</p>

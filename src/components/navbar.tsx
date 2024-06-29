@@ -10,9 +10,11 @@ import MainLogo from '../assets/main-logo';
 import { useAuth } from '@/hooks/useAuth';
 import { useMutation } from '@tanstack/react-query';
 import { logoutFn } from '@/api/auth';
+import { useItemList } from '@/store/useItemList';
 
 export default function Navbar() {
   const { logout } = useAuth();
+  const { items } = useItemList();
   const navigate = useNavigate();
 
   const logoutMut = useMutation({
@@ -42,10 +44,13 @@ export default function Navbar() {
       </div>
 
       <div>
-        <div className="bg-primary p-3 rounded-full text-white">
+        <div className="bg-primary p-3 rounded-full text-white relative">
           <ShoppingCartIcon size={20} />
+          <div className="absolute bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center -right-1 -top-1">
+            {items.length}
+          </div>
         </div>
-        <button onClick={() => logoutMut.mutate()}>Logout</button>
+        {/* <button onClick={() => logoutMut.mutate()}>Logout</button> */}
       </div>
     </nav>
   );

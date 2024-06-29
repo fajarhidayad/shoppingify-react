@@ -1,23 +1,12 @@
-import { zodResolver } from '@hookform/resolvers/zod';
-import { UseFormRegister, UseFormSetValue, useForm } from 'react-hook-form';
-import { z } from 'zod';
-import ErrorText from './error-text';
-import { useQuery } from '@tanstack/react-query';
 import { Category, getCategories } from '@/api/categories';
+import { CreateItem, createItem, createItemSchema } from '@/api/items';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useEffect, useRef, useState } from 'react';
-
-const createItemSchema = z.object({
-  name: z.string().min(1, { message: 'Name is required' }).max(50).trim(),
-  note: z.union([z.string().max(255).nullish(), z.literal('')]),
-  imageUrl: z.union([z.string().max(255).nullish(), z.literal('')]),
-  categoryName: z
-    .string()
-    .min(1, { message: 'Category is required' })
-    .max(50)
-    .trim(),
-});
-
-type CreateItem = z.infer<typeof createItemSchema>;
+import { UseFormRegister, UseFormSetValue, useForm } from 'react-hook-form';
+import ErrorText from './error-text';
+import { toast } from './ui/use-toast';
+import useClickOutside from '@/hooks/useClickOutside';
 
 export default function CreateItemForm(props: { onCloseForm: () => void }) {
   const {
@@ -29,8 +18,18 @@ export default function CreateItemForm(props: { onCloseForm: () => void }) {
     resolver: zodResolver(createItemSchema),
   });
 
+  const queryClient = useQueryClient();
+  const itemMutation = useMutation({
+    mutationFn: createItem,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['items'] });
+    },
+  });
+
   function onCreateItem(data: CreateItem) {
-    console.log(data);
+    itemMutation.mutate(data);
+    props.onCloseForm();
+    toast({ title: 'Success', description: 'Added new item' });
   }
 
   return (
@@ -119,31 +118,17 @@ function CategoryInputDropdown({
   setValues: UseFormSetValue<CreateItem>;
 }) {
   const [value, setValue] = useState<string>('');
-  const [dropdown, setDropdown] = useState(false);
   const [filteredCategories, setFilteredCategories] = useState<
     Category[] | undefined
   >([]);
 
   const ref = useRef<HTMLDivElement>(null);
+  const [dropdown, setDropdown] = useClickOutside(ref);
 
   const { data: categories } = useQuery({
     queryKey: ['categories'],
     queryFn: getCategories,
   });
-
-  const handleClickOutside = (e: MouseEvent) => {
-    if (ref.current && !ref.current.contains(e.target as Node)) {
-      setDropdown(false);
-    }
-  };
-
-  useEffect(() => {
-    document.addEventListener('mousedown', handleClickOutside);
-
-    return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-    };
-  }, []);
 
   useEffect(() => {
     const filtered = categories?.filter((cat) =>

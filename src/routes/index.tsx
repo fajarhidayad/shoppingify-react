@@ -1,13 +1,25 @@
-import { Link, createLazyFileRoute, useNavigate } from '@tanstack/react-router';
-import MainLogo from '../assets/main-logo';
-import { useEffect, useState } from 'react';
+import { getProfile } from '@/api/auth';
+import { Link, createFileRoute, useNavigate } from '@tanstack/react-router';
 import clsx from 'clsx';
+import { useEffect, useState } from 'react';
+import MainLogo from '../assets/main-logo';
+import { useAuth } from '@/hooks/useAuth';
 
-export const Route = createLazyFileRoute('/')({ component: HomePage });
+export const Route = createFileRoute('/')({
+  beforeLoad: async ({ context }) => {
+    getProfile()
+      .then((auth) => {
+        context.auth?.login(auth);
+      })
+      .catch();
+  },
+  component: HomePage,
+});
 
 function HomePage() {
   const [isScrolled, setIsScrolled] = useState(false);
   const navigate = useNavigate();
+  const { isAuthenticated } = useAuth();
 
   useEffect(() => {
     function handleScroll() {
@@ -41,18 +53,29 @@ function HomePage() {
           </Link>
 
           <div className="flex items-center space-x-4">
-            <button
-              onClick={() => navigate({ to: '/login' })}
-              className="bg-primary text-white rounded-lg px-5 py-3"
-            >
-              Login
-            </button>
-            <button
-              onClick={() => navigate({ to: '/register' })}
-              className="text-primary border border-primary bg-white rounded-lg px-5 py-3"
-            >
-              Register
-            </button>
+            {isAuthenticated ? (
+              <button
+                className="bg-primary text-white rounded-lg px-5 py-3"
+                onClick={() => navigate({ to: '/items' })}
+              >
+                Dashboard
+              </button>
+            ) : (
+              <>
+                <button
+                  onClick={() => navigate({ to: '/login' })}
+                  className="bg-primary text-white rounded-lg px-5 py-3"
+                >
+                  Login
+                </button>
+                <button
+                  onClick={() => navigate({ to: '/register' })}
+                  className="text-primary border border-primary bg-white rounded-lg px-5 py-3"
+                >
+                  Register
+                </button>
+              </>
+            )}
           </div>
         </div>
       </nav>
