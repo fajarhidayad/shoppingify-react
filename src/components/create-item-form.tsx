@@ -7,6 +7,7 @@ import { UseFormRegister, UseFormSetValue, useForm } from 'react-hook-form';
 import ErrorText from './error-text';
 import { toast } from './ui/use-toast';
 import useClickOutside from '@/hooks/useClickOutside';
+import Button from './button';
 
 export default function CreateItemForm(props: { onCloseForm: () => void }) {
   const {
@@ -93,18 +94,12 @@ export default function CreateItemForm(props: { onCloseForm: () => void }) {
       </div>
 
       <div className="flex items-center justify-center space-x-4 mt-auto">
-        <button
-          onClick={props.onCloseForm}
-          className="hover:bg-gray-100 font-bold rounded-xl p-5"
-        >
+        <Button onClick={props.onCloseForm} variant="ghost">
           cancel
-        </button>
-        <button
-          type="submit"
-          className="text-white bg-primary font-bold rounded-xl p-5"
-        >
+        </Button>
+        <Button type="submit" variant="primary">
           Save
-        </button>
+        </Button>
       </div>
     </form>
   );

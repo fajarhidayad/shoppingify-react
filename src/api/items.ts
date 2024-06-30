@@ -30,6 +30,17 @@ export async function getItems() {
   }
 }
 
+export async function searchItems(itemName: string) {
+  try {
+    const res = await api.get(`/items?item=${itemName}`);
+    return res.data as Item[];
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  } catch (error: any) {
+    const res = error.response.data;
+    throw new ErrorResponse(res.error, res.message, res.statusCode);
+  }
+}
+
 export const createItemSchema = z.object({
   name: z.string().min(1, { message: 'Name is required' }).max(50).trim(),
   note: z.union([z.string().max(255).nullish(), z.literal('')]),
@@ -46,7 +57,18 @@ export type CreateItem = z.infer<typeof createItemSchema>;
 export async function createItem(data: CreateItem) {
   try {
     const res = await api.post('/items', data);
-    return res.data as Item[];
+    return res.data as Item;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  } catch (error: any) {
+    const res = error.response.data;
+    throw new ErrorResponse(res.error, res.message, res.statusCode);
+  }
+}
+
+export async function deleteItem(id: number) {
+  try {
+    const res = await api.delete(`/items/${id}`);
+    return res.data as Item;
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } catch (error: any) {
     const res = error.response.data;

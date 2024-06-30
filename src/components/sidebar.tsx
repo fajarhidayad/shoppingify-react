@@ -6,14 +6,47 @@ import { MinusIcon, PencilIcon, PlusIcon, TrashIcon } from 'lucide-react';
 import { FormEvent, useRef } from 'react';
 import BottleLogo from '../assets/bottle-logo';
 import { useSidebarStore } from '../store/useSidebarStore';
+import Button from './button';
 import CreateItemForm from './create-item-form';
 import ItemDetailsMenu from './item-details-menu';
+import {
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from './ui/dialog';
+import { toast } from './ui/use-toast';
+import { useMutation } from '@tanstack/react-query';
+import { createList } from '@/api/list';
 
 export default function Sidebar() {
   const { active, setListActive, setCreateActive } = useSidebarStore();
+  const {
+    items,
+    setListName,
+    name: listName,
+    reset: resetList,
+  } = useItemList();
+
+  const listMutation = useMutation({ mutationFn: createList });
 
   function onSaveListName(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
+    const data = new FormData(e.target as HTMLFormElement);
+    const title = data.get('title') as string;
+    if (!title) {
+      toast({
+        title: 'Error',
+        description: 'Title cannot be empty',
+        variant: 'destructive',
+      });
+      return;
+    }
+    setListName(title);
+    listMutation.mutate({ name: title });
   }
 
   return (
@@ -42,33 +75,68 @@ export default function Sidebar() {
               </div>
             </section>
 
-            <section className="flex items-center justify-between mb-9 px-8">
-              <h2 className="font-bold text-gray-800 text-2xl">
-                Shopping list
-              </h2>
-              <PencilIcon size={24} />
-            </section>
-
             <ItemListContainerCart />
           </div>
 
           <section className="bg-white px-10 py-8">
-            <form
-              onSubmit={onSaveListName}
-              className="flex rounded-xl border-2 border-primary overflow-hidden"
-            >
-              <input
-                type="text"
-                placeholder="Enter a list title"
-                className="px-4 py-5 flex-1 focus:outline-none bg-transparent"
-              />
-              <button
-                type="submit"
-                className="bg-primary rounded-lg text-white font-bold px-6 flex-shrink-0"
+            {!listName && (
+              <form
+                onSubmit={onSaveListName}
+                className={clsx({
+                  'flex rounded-xl border-2 overflow-hidden': true,
+                  'border-gray-400': items.length < 1,
+                  'border-primary': items.length >= 1,
+                })}
               >
-                Save
-              </button>
-            </form>
+                <input
+                  type="text"
+                  name="title"
+                  disabled={items.length < 1}
+                  placeholder="Enter a list title"
+                  className="px-4 py-5 flex-1 focus:outline-none bg-transparent disabled:cursor-not-allowed"
+                />
+                <button
+                  type="submit"
+                  disabled={items.length < 1}
+                  className="bg-primary rounded-lg text-white font-bold px-6 flex-shrink-0 disabled:bg-gray-400"
+                >
+                  Save
+                </button>
+              </form>
+            )}
+            {listName && (
+              <div className="flex items-center justify-center space-x-4">
+                <Dialog>
+                  <DialogTrigger asChild>
+                    <Button variant="ghost">cancel</Button>
+                  </DialogTrigger>
+                  <DialogContent>
+                    <DialogHeader>
+                      <DialogTitle>
+                        Are you sure that you want to cancel this list?
+                      </DialogTitle>
+                    </DialogHeader>
+                    <DialogFooter>
+                      <DialogClose asChild>
+                        <Button variant="ghost" className="py-3">
+                          cancel
+                        </Button>
+                      </DialogClose>
+                      <DialogClose asChild>
+                        <Button
+                          variant="danger"
+                          className="py-3"
+                          onClick={resetList}
+                        >
+                          Yes
+                        </Button>
+                      </DialogClose>
+                    </DialogFooter>
+                  </DialogContent>
+                </Dialog>
+                <Button variant="secondary">Complete</Button>
+              </div>
+            )}
           </section>
         </div>
       )}
@@ -81,9 +149,9 @@ function ItemListContainerCart() {
 
   if (items.length < 1) {
     return (
-      <div className="relative flex-1 max-h-[calc(100vh-440px)] flex flex-col items-center justify-center">
+      <div className="relative flex-1 max-h-[calc(100vh-350px)] flex flex-col items-center justify-center">
         <p className="font-bold text-xl">No items</p>
-        <div className="absolute -bottom-8">
+        <div className="absolute -bottom-3">
           <CartLogo />
         </div>
       </div>
@@ -91,34 +159,40 @@ function ItemListContainerCart() {
   }
 
   return (
-    <ul className="flex-1 overflow-y-auto px-8 space-y-8 max-h-[calc(100vh-440px)]">
-      <li>
-        {/* <h4 className="text-sm font-medium text-gray-500 mb-5">
+    <>
+      <section className="flex items-center justify-between mb-9 px-8">
+        <h2 className="font-bold text-gray-800 text-2xl">Shopping list</h2>
+        <PencilIcon size={24} />
+      </section>
+      <ul className="flex-1 overflow-y-auto px-8 space-y-8 max-h-[calc(100vh-440px)]">
+        <li>
+          {/* <h4 className="text-sm font-medium text-gray-500 mb-5">
           Fruit and vegetables
         </h4> */}
-        <ul className="space-y-4">
-          {items.map((item) => (
-            <ListCartItem
-              key={item.id}
-              item={item}
-              onRemoveItem={() => removeItem(item.id)}
-              onIncrease={() =>
-                setQuantity(
-                  item.id,
-                  item.quantity + 1 === 0 ? item.quantity : item.quantity + 1
-                )
-              }
-              onDecrease={() =>
-                setQuantity(
-                  item.id,
-                  item.quantity - 1 === 0 ? item.quantity : item.quantity - 1
-                )
-              }
-            />
-          ))}
-        </ul>
-      </li>
-    </ul>
+          <ul className="space-y-4">
+            {items.map((item) => (
+              <ListCartItem
+                key={item.id}
+                item={item}
+                onRemoveItem={() => removeItem(item.id)}
+                onIncrease={() =>
+                  setQuantity(
+                    item.id,
+                    item.quantity + 1 === 0 ? item.quantity : item.quantity + 1
+                  )
+                }
+                onDecrease={() =>
+                  setQuantity(
+                    item.id,
+                    item.quantity - 1 === 0 ? item.quantity : item.quantity - 1
+                  )
+                }
+              />
+            ))}
+          </ul>
+        </li>
+      </ul>
+    </>
   );
 }
 

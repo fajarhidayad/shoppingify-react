@@ -1,7 +1,36 @@
+import { useItemList } from '@/store/useItemList';
 import { useSidebarStore } from '@/store/useSidebarStore';
+import { toast } from './ui/use-toast';
+import Button from './button';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { deleteItem } from '@/api/items';
+import {
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from './ui/dialog';
 
 export default function ItemDetailsMenu(props: { onCloseDetails: () => void }) {
-  const item = useSidebarStore((state) => state.itemDetails);
+  const { itemDetails: item, setListActive } = useSidebarStore();
+  const { addItem } = useItemList();
+
+  const queryClient = useQueryClient();
+  const deleteMutation = useMutation({
+    mutationFn: deleteItem,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['items'] });
+    },
+  });
+
+  function onDeleteItem() {
+    deleteMutation.mutate(item!.id);
+    setListActive();
+    toast({ title: 'Sucessfully delete item' });
+  }
 
   return (
     <div className="pt-7 pb-8 h-full px-11 bg-white flex flex-col">
@@ -32,12 +61,42 @@ export default function ItemDetailsMenu(props: { onCloseDetails: () => void }) {
       </div>
 
       <div className="flex items-center justify-center space-x-4 mt-auto">
-        <button className="hover:bg-gray-100 font-bold rounded-xl p-5">
-          delete
-        </button>
-        <button className="text-white bg-primary font-bold rounded-xl p-5">
+        <Dialog>
+          <DialogTrigger asChild>
+            <Button variant="ghost">delete</Button>
+          </DialogTrigger>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Are you sure?</DialogTitle>
+            </DialogHeader>
+            <DialogFooter>
+              <DialogClose asChild>
+                <Button variant="ghost" className="py-2">
+                  cancel
+                </Button>
+              </DialogClose>
+              <DialogClose asChild>
+                <Button
+                  onClick={onDeleteItem}
+                  variant="danger"
+                  className="py-2"
+                >
+                  Yes
+                </Button>
+              </DialogClose>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+        <Button
+          variant="primary"
+          onClick={() => {
+            addItem({ id: item!.id, name: item!.name, quantity: 1 });
+            toast({ title: 'Added to list' });
+            setListActive();
+          }}
+        >
           Add to list
-        </button>
+        </Button>
       </div>
     </div>
   );
